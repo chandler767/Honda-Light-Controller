@@ -100,11 +100,10 @@ void loop() {
             updateled();
         }
     }else{
-        buttonpressed = 0;
-    if (state == 7){
-        updateled();
-    }
-
+      buttonpressed = 0;
+      if (state == 7){
+          updateled();
+      }
     }
     delay(100);     
 }
