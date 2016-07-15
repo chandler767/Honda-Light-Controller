@@ -1,13 +1,12 @@
 #include <EEPROM.h>
 
-int ledr = 2;
-int ledg = 1;
-int ledb = 0;
-int buzz = 3;
-int button = 4;
-int PIN_RED = 2;
-int PIN_GREEN = 1;
-int PIN_BLUE = 0;
+/* This sketch was made for an ATtiny85 */
+
+int ledr = 2; // Red light NO pwm
+int ledg = 1; // Green light w pwm
+int ledb = 0; // Blue light w pwm
+int button = 4; // Analog pin 4
+
 int counter = 0;
 int numColors = 255;
 
@@ -20,18 +19,20 @@ int buttonState = 0;
 int buttonpressed = 0;
 
 void setup() {
+  
+    /* Get the last state from EEPROM. */
 
     state = EEPROM.read(34);
     if (state > 7) {
-        state =1;
+        state = 1;
     }
-
     pinMode(ledr, OUTPUT);  
     pinMode(ledg, OUTPUT);     
     pinMode(ledb, OUTPUT); 
-    pinMode(buzz, OUTPUT);
     pinMode(button, INPUT);     
-                
+  
+    /* When the ATtiny gets power the leds cycle through a color sequence. */
+          
     digitalWrite(ledr, HIGH);    
     digitalWrite(ledg, LOW);    
     digitalWrite(ledb, LOW); 
@@ -60,31 +61,28 @@ void setup() {
     digitalWrite(ledg, LOW);    
     digitalWrite(ledb, LOW); 
     delay(250);
-
     updateled();
-
 }
 
 void loop() {
+  
+    /* This handles the button press and keeps up with the count. It also
+    writes this value to EEPROM so the next time the car turns on the RGB 
+    strip will go back to the last selection. */
+  
     buttonState = digitalRead(button);
     if (buttonState == HIGH) { 
         if (buttonpressed == 1){
         }else{
             buttonpressed = 1;
             if (state == 7) {
-                state =1;
+                state = 1;
             }else{
-                state = (state+1);
+                state = (state + 1);
             }
             EEPROM.write(34, state);
-
-
-            if (state == 1) {
-                tone(buzz, 1000, 1150);
-            }else if (state == 7){
-                tone(buzz, 900, 150);
-                delay(100);
-                tone(buzz, 800, 150);
+            if (state == 7){
+                delay(100);     
                 digitalWrite(ledr, HIGH);    
                 digitalWrite(ledg, LOW);    
                 digitalWrite(ledb, LOW); 
@@ -98,8 +96,6 @@ void loop() {
                 digitalWrite(ledb, HIGH);  
                 delay(100);
                 stateswitch = random(1, 4); 
-            }else{
-                tone(buzz, 700, 250);
             }
             updateled();
         }
@@ -115,6 +111,11 @@ void loop() {
 
 void updateled() {
 
+    /* This controls the RGB led strips by keeping the count of button presses
+    in the 'state' variable. The lights are only controlled from one button in
+    the car's dash. The ATtiny85 this circut was designed for only has 
+    two PWM pins so my color choices are more limited. */
+    
     if (state == 1) {
         digitalWrite(ledr, LOW);    
         digitalWrite(ledg, LOW);    
@@ -148,7 +149,7 @@ void updateled() {
                 digitalWrite(ledr, HIGH);    
                 digitalWrite(ledg, LOW);    
                 digitalWrite(ledb, LOW); 
-            } else if (stateswitch == 1) {
+            } else if (stateswitch == 2) {
                 analogWrite(ledr, 0);   
                 analogWrite(ledg, 100);  
                 analogWrite(ledb, 0);  
